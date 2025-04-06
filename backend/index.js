@@ -37,6 +37,7 @@ ${text}
    - Jurisdiction and court level (if mentioned)
    - Time frame of the case versus the user's situation
    - If the case is not even a story, but talks about a relevant topic, it must not be considered relevant
+   - If the case is in another top level category (e.g. traffic, employment, etc.), it must not be considered relevant
 
 5. Based on your analysis, prepare a justification for the relevance of the case to the user's situation. This should be a detailed explanation of why the case is or isn't relevant, citing specific aspects from both the user's situation and the case details.
 
