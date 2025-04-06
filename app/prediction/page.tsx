@@ -15,57 +15,18 @@ import {
   MessageSquare,
   Phone,
   Star,
+  AlertCircle,
+  CheckCircle,
+  XCircle,
+  Info,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
-
-// Mock data for similar cases
-const similarCases = [
-  {
-    id: 1,
-    title: "Johnson v. Smith",
-    citation: "123 F.3d 456 (9th Cir. 2021)",
-    description: "Personal injury case involving a slip and fall at a grocery store",
-    facts:
-      "Plaintiff slipped on a wet floor in the produce section. No caution sign was present. Store had knowledge of the spill for approximately 15 minutes before the incident occurred.",
-    outcome: "Favorable settlement of $45,000",
-    reasoning:
-      "The court found that the store had a duty to warn customers of known hazards and failed to do so in a timely manner.",
-    similarity: 87,
-    highlights: ["slip and fall", "premises liability", "moderate injuries"],
-    date: "June 12, 2021",
-  },
-  {
-    id: 2,
-    title: "Garcia v. City Hospital",
-    citation: "234 F.3d 567 (7th Cir. 2020)",
-    description: "Medical malpractice case involving incorrect medication dosage",
-    facts:
-      "Patient was administered 10x the prescribed dose of medication by hospital staff, resulting in temporary organ damage and extended hospital stay.",
-    outcome: "Jury verdict of $120,000 for plaintiff",
-    reasoning:
-      "The jury determined that the hospital staff failed to follow standard medication protocols and that this deviation from the standard of care directly caused the plaintiff's injuries.",
-    similarity: 72,
-    highlights: ["medical error", "negligence", "documented injuries"],
-    date: "November 3, 2020",
-  },
-  {
-    id: 3,
-    title: "Williams v. ABC Corporation",
-    citation: "345 F.3d 678 (6th Cir. 2022)",
-    description: "Workplace injury case involving machinery malfunction",
-    facts:
-      "Employee was injured when a safety guard on manufacturing equipment failed. Maintenance records showed the company was aware of the issue but delayed repairs.",
-    outcome: "Settlement of $65,000 plus medical expenses",
-    reasoning:
-      "The company was found to have violated OSHA regulations by failing to maintain equipment in safe working condition despite knowledge of the defect.",
-    similarity: 68,
-    highlights: ["workplace injury", "equipment failure", "negligent maintenance"],
-    date: "March 17, 2022",
-  },
-]
+import { useAtomValue } from 'jotai/react'
+import { predictionAtom } from '@/store'
+import { MarkdownContent } from '@/components/markdown-content'
 
 // Mock data for matched lawyers
 const matchedLawyers = [
@@ -117,20 +78,40 @@ export default function PredictionPage() {
     day: "numeric",
   })
 
+  const caseAnalysisData = useAtomValue(predictionAtom)
+
+  // Filter cases with relevance score > 0
+  const relevantCases = caseAnalysisData.filter((caseData) => caseData.relevance_score > 50)
+
+  // Calculate success probability based on relevant cases
   useEffect(() => {
     // Simulate loading prediction
     const timer = setTimeout(() => {
       setPredictionLoaded(true)
-      // Simulate a prediction between 65-85%
-      setSuccessProbability(Math.floor(Math.random() * 20) + 65)
+
+      // Calculate probability based on case outcomes and relevance
+      const totalRelevance = relevantCases.reduce((sum, caseData) => sum + caseData.relevance_score, 0)
+
+      if (totalRelevance > 0) {
+        const weightedOutcomes = relevantCases.reduce((sum, caseData) => {
+          return sum + (caseData.case_outcome.won ? caseData.relevance_score : 0)
+        }, 0)
+
+        const calculatedProbability = Math.round((weightedOutcomes / totalRelevance) * 100)
+        // Ensure probability is between 20-90% for UI purposes
+        setSuccessProbability(Math.max(20, Math.min(90, calculatedProbability)))
+      } else {
+        // Default probability if no relevant cases
+        setSuccessProbability(50)
+      }
     }, 1500)
 
     return () => clearTimeout(timer)
-  }, [])
+  }, [relevantCases])
 
   const getProbabilityColor = (probability: number) => {
-    if (probability >= 80) return "text-green-600"
-    if (probability >= 60) return "text-yellow-600"
+    if (probability >= 70) return "text-green-600"
+    if (probability >= 40) return "text-yellow-600"
     return "text-red-600"
   }
 
@@ -160,16 +141,18 @@ export default function PredictionPage() {
                 <span className={getProbabilityColor(successProbability)}>{successProbability}%</span>
                 {successProbability >= 70 ? (
                   <ThumbsUp className="h-8 w-8 text-green-600" />
+                ) : successProbability >= 40 ? (
+                  <AlertCircle className="h-8 w-8 text-yellow-600" />
                 ) : (
-                  <ThumbsDown className="h-8 w-8 text-yellow-600" />
+                  <ThumbsDown className="h-8 w-8 text-red-600" />
                 )}
               </div>
               <p className="text-center text-gray-600 max-w-md">
-                {successProbability >= 80
+                {successProbability >= 70
                   ? "Your case has a strong likelihood of a favorable outcome based on our analysis."
-                  : successProbability >= 60
+                  : successProbability >= 40
                     ? "Your case has a moderate chance of success with proper legal representation."
-                    : "Your case presents some challenges, but an experienced attorney may help improve your chances."}
+                    : "Your case presents significant challenges, but an experienced attorney may help improve your chances."}
               </p>
             </div>
           )}
@@ -177,7 +160,6 @@ export default function PredictionPage() {
       </Card>
 
       <div className="bg-white border rounded-lg shadow-sm overflow-hidden mb-8">
-        {/* Document header */}
         <div className="p-6 border-b">
           <div className="flex justify-between items-start mb-4">
             <div className="flex items-center gap-2">
@@ -201,64 +183,62 @@ export default function PredictionPage() {
           </p>
         </div>
 
-        {/* Document content */}
         <div className="p-6">
           <div className="flex items-center gap-2 mb-4">
             <Scale className="h-5 w-5 text-gray-600" />
             <h3 className="text-lg font-medium">Relevant Legal Precedents</h3>
           </div>
 
-          <div className="space-y-8">
-            {similarCases.map((caseItem, index) => (
-              <div key={caseItem.id} className="space-y-3">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h4 className="font-medium text-gray-900">{caseItem.title}</h4>
-                    <p className="text-sm text-gray-500 font-mono">{caseItem.citation}</p>
-                  </div>
-                  <div className="flex items-center gap-1 text-xs bg-gray-100 px-2 py-1 rounded-full">
-                    <span className="font-medium">{caseItem.similarity}%</span>
-                    <span className="text-gray-500">similarity</span>
-                  </div>
-                </div>
-
-                <div className="pl-4 border-l-2 border-gray-200 space-y-2">
-                  <div>
-                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Facts</span>
-                    <p className="text-sm text-gray-700">{caseItem.facts}</p>
-                  </div>
-
-                  <div>
-                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Outcome</span>
-                    <p className="text-sm text-gray-700">{caseItem.outcome}</p>
-                  </div>
-
-                  <div>
-                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Reasoning</span>
-                    <p className="text-sm text-gray-700">{caseItem.reasoning}</p>
-                  </div>
-
-                  <div>
-                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Key Elements</span>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {caseItem.highlights.map((highlight, hIndex) => (
-                        <span key={hIndex} className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
-                          {highlight}
-                        </span>
-                      ))}
+          {relevantCases.length > 0 ? (
+            <div className="space-y-8">
+              {relevantCases.map((caseData, index) => (
+                <div key={caseData.case_name} className="space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-medium text-gray-900">{caseData.case_name}</h4>
+                      <p className="text-sm text-gray-500">Workers&apos; Compensation Appeals Board</p>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs bg-gray-100 px-2 py-1 rounded-full">
+                      <span className="font-medium">{caseData.relevance_score}%</span>
+                      <span className="text-gray-500">similarity</span>
                     </div>
                   </div>
 
-                  <div className="text-xs text-gray-400 flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    <span>Decided: {caseItem.date}</span>
-                  </div>
-                </div>
+                  <div className="pl-4 border-l-2 border-gray-200 space-y-2">
+                    <div>
+                      <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Case Summary</span>
+                      <MarkdownContent content={caseData.relevance_justification}/>
+                    </div>
 
-                {index < similarCases.length - 1 && <Separator className="my-4" />}
+                    <div>
+                      <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Outcome</span>
+                      <div className="flex items-center gap-2 mt-1">
+                        {caseData.case_outcome.won ? (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <XCircle className="h-4 w-4 text-red-500" />
+                        )}
+                        <p className="text-sm text-gray-700">{caseData.case_outcome.explanation}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {index < relevantCases.length - 1 && <Separator className="my-4" />}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-8 text-center">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-yellow-50 text-yellow-500 mb-4">
+                <Info className="h-6 w-6" />
               </div>
-            ))}
-          </div>
+              <h3 className="text-lg font-medium mb-2">No Highly Relevant Cases Found</h3>
+              <p className="text-gray-500 max-w-md mx-auto">
+                We couldn&apos;t find cases with strong similarities to your situation. This could mean your case is unique
+                or requires specialized legal expertise.
+              </p>
+            </div>
+          )}
 
           <div className="mt-8 pt-4 border-t text-sm text-gray-500">
             <p>
@@ -339,4 +319,3 @@ export default function PredictionPage() {
     </div>
   )
 }
-
