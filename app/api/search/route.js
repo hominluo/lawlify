@@ -591,7 +591,7 @@ Remember, your analysis should be objective and based solely on the information 
 };
 
 const processFiles = async (query) => {
-  const mdFiles = Object.keys(files).filter(file => file.toLowerCase().endsWith('.md'));
+  const mdFiles = Object.keys(files);
 
   const promises = mdFiles.map((file) => {
     return new Promise(async (resolve) => {

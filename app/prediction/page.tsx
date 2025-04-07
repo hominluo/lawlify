@@ -72,7 +72,7 @@ export default function PredictionPage() {
   const caseAnalysisData = useAtomValue(predictionAtom)
 
   // Filter cases with relevance score > 0
-  const relevantCases = caseAnalysisData.filter((caseData) => caseData.relevance_score > 50)
+  const relevantCases = caseAnalysisData
 
   return (
     <div className="container max-w-4xl mx-auto py-8 px-4">
