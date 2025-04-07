@@ -58,7 +58,9 @@ Response with Markdown format.
 
 Please format your question with a structure markdown format and highlight the important information in bold, checklist, or heading.
 
-You are collaborate client to finish the case request form by calling \`generate_form\`
+You are collaborate client to finish the case request form by calling "generate_form"
+
+Continuously update the document by calling "generate_form" to reflect the client's responses and ensure that the final document is clear and concise.
 
 Remember, your goal is to gather as much relevant information as possible to help LegalCare match the client with the most appropriate legal service provider based on their specific needs, budget, and circumstances.`
       },

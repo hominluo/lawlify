@@ -8,20 +8,18 @@ import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useChat } from '@ai-sdk/react'
 import { MarkdownContent } from '@/components/markdown-content'
-import { EditorInstance } from '@/components/editor'
-import { markdownFromHTML } from '@/lib/markdown'
+import { htmlFromMarkdown, markdownFromHTML } from '@/lib/markdown'
+import { useAtomValue } from 'jotai/react'
+import { editorAtom } from '@/store'
 
 interface ChatInterfaceProps {
   caseCategory: string
-  onSetDescriptionAction: (description: string) => void
-  ref?: React.RefObject<EditorInstance>
 }
 
 export function ChatInterface ({
   caseCategory,
-  onSetDescriptionAction,
-  ref
 }: ChatInterfaceProps) {
+  const editor = useAtomValue(editorAtom)
   const {
     messages,
     input,
@@ -30,11 +28,13 @@ export function ChatInterface ({
     setInput,
     status
   } = useChat({
+    id: 'main',
     onToolCall: ({ toolCall }) => {
       if (toolCall.toolName === 'generate_form') {
-        onSetDescriptionAction((toolCall.args as any).description)
+        editor.setContent(htmlFromMarkdown((toolCall.args as any).description))
+        return 'success'
       } else if (toolCall.toolName === 'get_current_form') {
-        return markdownFromHTML(ref!.current!.getDocHTML())
+        return markdownFromHTML(editor.getDocHTML())
       }
     }
   })

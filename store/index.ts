@@ -1,4 +1,6 @@
 import { atom } from 'jotai'
+import { defineBasicExtension } from 'prosekit/basic'
+import { createEditor } from 'prosekit/core'
 
 export const predictionAtom = atom<{
   case_name: string
@@ -9,3 +11,8 @@ export const predictionAtom = atom<{
     explanation: string
   },
 }[]>([])
+
+export const editorAtom = atom(() => {
+  const extension = defineBasicExtension()
+  return createEditor({ extension })
+})

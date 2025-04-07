@@ -19,8 +19,8 @@ import { ChatInterface } from '@/components/chat-interface'
 import { Editor, EditorInstance } from '@/components/editor'
 import { htmlFromMarkdown, markdownFromHTML } from '@/lib/markdown'
 import { cn } from '@/lib/utils'
-import { useSetAtom } from 'jotai/react'
-import { predictionAtom } from '@/store'
+import { useAtomValue, useSetAtom } from 'jotai/react'
+import { editorAtom, predictionAtom } from '@/store'
 import { useRouter } from 'next/navigation'
 
 export default function StartPage () {
@@ -35,37 +35,25 @@ export default function StartPage () {
 
   const [isPending, startTransition] = useTransition()
 
-  const progress = (step / totalSteps) * 100
-
   const handleCaseCategoryChange = (category: string) => {
     setFormData((prev) => ({ ...prev, caseCategory: category }))
     // Automatically move to step 2 when category is selected
     setStep(2)
   }
 
-  const editorRef = useRef<EditorInstance | null>(null)
+  const editor = useAtomValue(editorAtom)
 
   const setPrediction = useSetAtom(predictionAtom)
   const router = useRouter()
 
   return (
     <div className="container mx-auto space-y-4">
-      <div>
+      <div className="mt-4">
         <Link href="/"
               className="flex items-center text-sm text-gray-500 hover:text-gray-900">
           <ArrowLeft className="mr-2 h-4 w-4"/>
           Back to Home
         </Link>
-      </div>
-
-      <div>
-        <h1 className="text-2xl font-bold mb-2">Find Legal Help</h1>
-        <div className="flex items-center gap-4">
-          <Progress value={progress} className="h-2 flex-1"/>
-          <span className="text-sm text-gray-500">
-            Step {step} of {totalSteps}
-          </span>
-        </div>
       </div>
 
       <div
@@ -99,11 +87,6 @@ export default function StartPage () {
               <CardContent>
                 <ChatInterface
                   caseCategory={formData.caseCategory}
-                  onSetDescriptionAction={(text) => {
-                    editorRef.current!.setContent(
-                      htmlFromMarkdown(text)
-                    )
-                  }}
                 />
               </CardContent>
             </>
@@ -113,9 +96,7 @@ export default function StartPage () {
         {step === 2 && (
           <Card className="w-96">
             <CardContent className="flex flex-col h-full">
-              <Editor
-                ref={editorRef}
-              />
+              <Editor/>
               <div
                 className="w-full flex gap-4"
               >
@@ -128,7 +109,7 @@ export default function StartPage () {
                       const response = await fetch('/api/search', {
                         method: 'POST',
                         body: JSON.stringify({
-                          query: markdownFromHTML(editorRef.current!.getDocHTML())
+                          query: markdownFromHTML(editor.getDocHTML())
                         })
                       })
                       setPrediction(await response.json())

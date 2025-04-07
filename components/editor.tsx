@@ -2,32 +2,18 @@ import 'prosekit/basic/style.css'
 import 'prosekit/basic/typography.css'
 
 import {
-  createEditor,
   Editor as EditorInstance
 } from 'prosekit/core'
 import { ProseKit } from 'prosekit/react'
-import { useImperativeHandle, useMemo } from 'react'
-import { defineBasicExtension } from 'prosekit/basic'
+import { useAtomValue } from 'jotai/react'
+import { editorAtom } from '@/store'
 
 export type {
   EditorInstance
 }
 
-export type EditorProps = {
-  onChange?: (value: string) => void
-  onSubmit?: (value: string) => void
-  ref?: React.ForwardedRef<EditorInstance>
-}
-
-export const Editor = function Editor (
-  { ref }: EditorProps) {
-  const editor = useMemo(() => {
-    const extension = defineBasicExtension()
-    return createEditor({ extension })
-  }, [])
-
-  useImperativeHandle(ref, () => editor, [editor])
-
+export const Editor = function Editor () {
+  const editor = useAtomValue(editorAtom)
   return (
     <ProseKit editor={editor}>
       <div className="relative w-full flex-1 box-border overflow-y-scroll">
