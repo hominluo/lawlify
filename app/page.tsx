@@ -7,7 +7,7 @@ export default function LandingPage() {
     <div className="flex flex-col min-h-screen">
       <header className="border-b">
         <div className="container flex h-16 items-center px-4 sm:px-6">
-          <div className="font-bold text-xl">LegalMatch</div>
+          <div className="font-bold text-xl">Lawlify</div>
           <nav className="ml-auto flex gap-4 sm:gap-6">
             <Link href="#" className="text-sm font-medium hover:underline">
               About
@@ -176,7 +176,7 @@ export default function LandingPage() {
       </main>
       <footer className="border-t py-6 md:py-0">
         <div className="container flex flex-col items-center justify-between gap-4 md:h-16 md:flex-row">
-          <p className="text-sm text-gray-500">© 2025 LegalMatch. All rights reserved.</p>
+          <p className="text-sm text-gray-500">© 2025 Lawlify. All rights reserved.</p>
           <div className="flex gap-4">
             <Link href="#" className="text-sm text-gray-500 hover:underline">
               Terms
