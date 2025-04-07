@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { editorAtom, predictionAtom } from '@/store'
 import { useRouter } from 'next/navigation'
+import { ResizablePanelGroup } from '@/components/ui/resizable'
 
 export default function StartPage () {
   const [step, setStep] = useState(1)
@@ -31,7 +32,6 @@ export default function StartPage () {
     caseCategory: '',
     caseDetails: ''
   })
-
 
   const [isPending, startTransition] = useTransition()
 
@@ -47,8 +47,8 @@ export default function StartPage () {
   const router = useRouter()
 
   return (
-    <div className="container mx-auto space-y-4">
-      <div className="mt-4">
+    <div className="box-border h-screen w-screen container flex flex-col">
+      <div className="py-4">
         <Link href="/"
               className="flex items-center text-sm text-gray-500 hover:text-gray-900">
           <ArrowLeft className="mr-2 h-4 w-4"/>
@@ -57,7 +57,7 @@ export default function StartPage () {
       </div>
 
       <div
-        className="flex flex-row gap-4"
+        className="h-full flex flex-row gap-4"
       >
         <Card className={cn(step === 1 ? 'mx-auto' : 'flex-1')}>
           {step === 1 && (
@@ -119,7 +119,7 @@ export default function StartPage () {
                 >
                   {isPending ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
-                  ): <ArrowRight className="mr-2 h-4 w-4"/>}
+                  ) : <ArrowRight className="mr-2 h-4 w-4"/>}
                   {isPending ? 'Searching...' : 'Search'}
                 </Button>
               </div>

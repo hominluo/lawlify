@@ -52,7 +52,7 @@ Something you need to gather from the client:
   - Can afford a flat-fee attorney (maximum $1,000/matter).
   - Income is at or below 125% of the FPL.
 
-Present your follow-up question, ask much as possible for each response.
+Present your follow-up question, ask only one question per response.
 
 Response with Markdown format.
 

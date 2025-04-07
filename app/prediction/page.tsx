@@ -1,13 +1,8 @@
 "use client"
-
-import { useEffect, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import Image from "next/image"
 import {
   ArrowLeft,
-  ThumbsUp,
-  ThumbsDown,
   FileText,
   BookOpen,
   Scale,
@@ -15,18 +10,16 @@ import {
   MessageSquare,
   Phone,
   Star,
-  AlertCircle,
   CheckCircle,
   XCircle,
   Info,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
 import { useAtomValue } from 'jotai/react'
 import { predictionAtom } from '@/store'
 import { MarkdownContent } from '@/components/markdown-content'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
 // Mock data for matched lawyers
 const matchedLawyers = [
@@ -70,8 +63,6 @@ export default function PredictionPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const category = searchParams.get("category") || ""
-  const [predictionLoaded, setPredictionLoaded] = useState(false)
-  const [successProbability, setSuccessProbability] = useState(0)
   const currentDate = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -83,38 +74,6 @@ export default function PredictionPage() {
   // Filter cases with relevance score > 0
   const relevantCases = caseAnalysisData.filter((caseData) => caseData.relevance_score > 50)
 
-  // Calculate success probability based on relevant cases
-  useEffect(() => {
-    // Simulate loading prediction
-    const timer = setTimeout(() => {
-      setPredictionLoaded(true)
-
-      // Calculate probability based on case outcomes and relevance
-      const totalRelevance = relevantCases.reduce((sum, caseData) => sum + caseData.relevance_score, 0)
-
-      if (totalRelevance > 0) {
-        const weightedOutcomes = relevantCases.reduce((sum, caseData) => {
-          return sum + (caseData.case_outcome.won ? caseData.relevance_score : 0)
-        }, 0)
-
-        const calculatedProbability = Math.round((weightedOutcomes / totalRelevance) * 100)
-        // Ensure probability is between 20-90% for UI purposes
-        setSuccessProbability(Math.max(20, Math.min(90, calculatedProbability)))
-      } else {
-        // Default probability if no relevant cases
-        setSuccessProbability(50)
-      }
-    }, 1500)
-
-    return () => clearTimeout(timer)
-  }, [relevantCases])
-
-  const getProbabilityColor = (probability: number) => {
-    if (probability >= 70) return "text-green-600"
-    if (probability >= 40) return "text-yellow-600"
-    return "text-red-600"
-  }
-
   return (
     <div className="container max-w-4xl mx-auto py-8 px-4">
       <div className="mb-8">
@@ -123,41 +82,6 @@ export default function PredictionPage() {
           Back to Case Details
         </Link>
       </div>
-
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Success Probability</CardTitle>
-          <CardDescription>Our prediction based on similar cases and legal precedents</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {!predictionLoaded ? (
-            <div className="space-y-4 py-8">
-              <p className="text-center text-gray-500">Analyzing your case...</p>
-              <Progress value={60} className="h-2 w-full" />
-            </div>
-          ) : (
-            <div className="flex flex-col items-center py-6">
-              <div className="text-5xl font-bold mb-4 flex items-center gap-3">
-                <span className={getProbabilityColor(successProbability)}>{successProbability}%</span>
-                {successProbability >= 70 ? (
-                  <ThumbsUp className="h-8 w-8 text-green-600" />
-                ) : successProbability >= 40 ? (
-                  <AlertCircle className="h-8 w-8 text-yellow-600" />
-                ) : (
-                  <ThumbsDown className="h-8 w-8 text-red-600" />
-                )}
-              </div>
-              <p className="text-center text-gray-600 max-w-md">
-                {successProbability >= 70
-                  ? "Your case has a strong likelihood of a favorable outcome based on our analysis."
-                  : successProbability >= 40
-                    ? "Your case has a moderate chance of success with proper legal representation."
-                    : "Your case presents significant challenges, but an experienced attorney may help improve your chances."}
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
       <div className="bg-white border rounded-lg shadow-sm overflow-hidden mb-8">
         <div className="p-6 border-b">
@@ -266,9 +190,9 @@ export default function PredictionPage() {
               <div key={lawyer.id} className="border rounded-lg overflow-hidden">
                 <div className="p-4">
                   <div className="flex items-start gap-4">
-                    <div className="relative h-16 w-16 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
-                      <Image src={lawyer.image || "/placeholder.svg"} alt={lawyer.name} fill className="object-cover" />
-                    </div>
+                    <Avatar className="relative h-16 w-16 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+                      <AvatarFallback>{lawyer.name.substring(0, 2)}</AvatarFallback>
+                    </Avatar>
 
                     <div>
                       <h3 className="text-lg font-bold">{lawyer.name}</h3>
