@@ -1,6 +1,9 @@
 import { openai } from '@ai-sdk/openai'
 import { streamText, tool } from 'ai'
 import { z } from 'zod'
+import json from './output.json'
+
+const items = json.map(j => `${j.Code}:${j.Title}`).join('\n')
 
 export const maxDuration = 30
 
@@ -44,9 +47,11 @@ When formulating questions, keep in mind the following:
 - Frame questions in a way that encourages detailed responses
 - Do not make assumptions about the client's legal knowledge or financial situation
 
-Something you need to gather from the client:
+Something you need to gather from the client, and you need write this clearly in the final document:
 1. Type of legal matter
+  - Please use Stanford Law’s LIST taxonomy with code and title, following: ${items}
 2. Service region by county, or it's remote
+  - Please write the county name
 3. Budget
   - Can afford a private attorney at typical rates (at least $300/hour)
   - Can afford a flat-fee attorney (maximum $1,000/matter).
